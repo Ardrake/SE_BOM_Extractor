@@ -48,9 +48,6 @@ def ExtractSubOccurrence(objOccurenceSets, level=1, nomenclature = []):
     part = ["assembly", "part" "longueur", "largeur", "Epaisseur"]
     for i in range(objOccurenceSets.Count):
         objSubOccurrences = objOccurenceSets.Item(i + 1)
-        prefix = " " * level
-        #print ("%s-Assmbly :%s Part :%s" % (prefix, objOccurenceSets.Parent.Name, objSubOccurrences.Name))
-
         if objSubOccurrences.Subassembly == False:
             VariableSet = objSubOccurrences.SubOccurrenceDocument.Variables
             SE_long = 0
@@ -65,14 +62,14 @@ def ExtractSubOccurrence(objOccurenceSets, level=1, nomenclature = []):
                     SE_larg = convert(Variables.Value)
                 if Variables.ExposeName == "SE_EPAISSEUR":
                     SE_epai = convert(Variables.Value)
-                    
+            #This part needs to be optimised / refactored-------------**
             if level == 3:                    
                 part = [objSubOccurrences.Parent.Parent.Name, objOccurenceSets.Parent.Name,  objSubOccurrences.Name, (SE_epai, SE_larg, SE_long)]
             if level == 4:
                 part = [objSubOccurrences.Parent.Parent.Parent.Name, objOccurenceSets.Parent.Name,  objSubOccurrences.Name, (SE_epai, SE_larg, SE_long)]
             if level == 5:
                 part = [objSubOccurrences.Parent.Parent.Parent.Parent.Name, objOccurenceSets.Parent.Name,  objSubOccurrences.Name, (SE_epai, SE_larg, SE_long)]
-
+            #----------------------------------------------------------**
             nomenclature.append(part)
             #print nomenclature
         if objSubOccurrences.SubOccurrences != None: 
