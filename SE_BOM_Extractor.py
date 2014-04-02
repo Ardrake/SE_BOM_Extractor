@@ -1,51 +1,23 @@
+# -*- coding: utf-8 -*-
 import clr
 clr.AddReference("Interop.SolidEdge")
 clr.AddReference("System.Runtime.InteropServices")
-
 import System.Runtime.InteropServices as SRI
-
-#from System import Console
 
 objOccurenceSets = None
 objOccurrences = None
 objSubOccurenceSets = None
 objSubOccurrences = None
-objSubSubOccurenceSets = None
-objSubSubOccurrences = None
-strFormatBoMlvl1 = "[%s]"
-strFormatBomLvl2 = " - %s"
-strFormatBomLvl3 = "   - %s"
-strFormat2 = "%s = %s (%s)"
+
 
 
 objApplication = SRI.Marshal.GetActiveObject("SolidEdge.Application")
 objDocument = objApplication.ActiveDocument
 objOccurenceSets = objDocument.Occurrences
-
-# for i in range(objOccurenceSets.Count):
-#     objOccurrences = objOccurenceSets.Item(i + 1)
-#     print(strFormatBoMlvl1 % objOccurrences.Name)
-#   
-#     objSubOccurenceSets = objOccurrences.SubOccurrences
-#        
-#     for i in range(objSubOccurenceSets.Count):
-#         objSubOccurrences = objSubOccurenceSets.Item(i + 1)     
-#         print(strFormatBomLvl2 % objSubOccurrences.Name)
-#   
-#         objSubSubOccurenceSets = objSubOccurrences.SubOccurrences
-#            
-#         for i in range(objSubSubOccurenceSets.Count):
-#             objSubSubOccurrences = objSubSubOccurenceSets.Item(i + 1)     
-#             print(strFormatBomLvl3 % objSubSubOccurrences.Name)
-#             VariableSet = objSubSubOccurrences.SubOccurrenceDocument.Variables
-#             for i in range(VariableSet.Count):
-#                 Variables = VariableSet.Item(i + 1)
-#                 if Variables.ExposeName[:2] == "SE":
-#                     print "     - %s : %f = %f" % (Variables.ExposeName, Variables.Value, Variables.Value/0.0254) 
-
             
 def ExtractSubOccurrence(objOccurenceSets, level=1, nomenclature = []):
-    part = ["assembly", "part" "longueur", "largeur", "Epaisseur"]
+    #Extract part object, in index 0, 2nd level of assembly� Index 1, part name, Index 2,3 and 4 are Length, Witdh and heigth
+    part = ["assembly", "part", "longueur", "largeur", "Epaisseur"]
     for i in range(objOccurenceSets.Count):
         objSubOccurrences = objOccurenceSets.Item(i + 1)
         if objSubOccurrences.Subassembly == False:
@@ -63,6 +35,8 @@ def ExtractSubOccurrence(objOccurenceSets, level=1, nomenclature = []):
                 if Variables.ExposeName == "SE_EPAISSEUR":
                     SE_epai = convert(Variables.Value)
             #This part needs to be optimised / refactored-------------**
+            if level == 2:                    
+                part = [objSubOccurrences.Parent.Name, objOccurenceSets.Parent.Name,  objSubOccurrences.Name, (SE_epai, SE_larg, SE_long)]
             if level == 3:                    
                 part = [objSubOccurrences.Parent.Parent.Name, objOccurenceSets.Parent.Name,  objSubOccurrences.Name, (SE_epai, SE_larg, SE_long)]
             if level == 4:
@@ -78,20 +52,52 @@ def ExtractSubOccurrence(objOccurenceSets, level=1, nomenclature = []):
 
             
 def convert(val,frac=0.125):
+    #convert decimal to inches
     return  round((int((round(val,4) / 0.0254) / frac))*frac,4)  
+
+def BuildQuery(BOM):
+    # Build SQL Query to insert list data in SQL Table
+    keys_to_sql = "SE_top, SE_pere, SE_piece,SE_epaisseur,SE_largeur,SE_longueur"
+    SQLQuery = "INSERT INTO SE_BOM("+keys_to_sql+")"
+    tot_rec = 0
+    for item in BOM:
+        vars_to_sql = []
+        tot_rec+=1
+        #print tot_rec
+        for i in item:
+            value_type = type(i)
+            if value_type == tuple:
+                for n in i:
+                    #print (n , type(n))
+                    vars_to_sql.append("'"+str(n)+"'")
+            if value_type <> tuple:
+                vars_to_sql.append("'"+i+"'")
+        final_to_sql = ','.join(vars_to_sql)
+        if tot_rec == len(BOM):
+            SQLQuery = SQLQuery + "SELECT " + final_to_sql +" GO"
+        else:
+            SQLQuery = SQLQuery + "SELECT " + final_to_sql + " UNION ALL "
+    return SQLQuery
+        
+
+
+MP = ExtractSubOccurrence(objOccurenceSets)    
+
+
+print BuildQuery(MP)    
+    
            
            
 #print convert(0.3048+0.0015875)
-MP = ExtractSubOccurrence(objOccurenceSets)
+
 
 assembly = []
 for item in MP:
     assembly.append(item[0])
-    print item
-print ("Item count: ", len(MP))
-print ("Top level assemblies: ", set(assembly))
+    #print item
+#print ("Item count: ", len(MP))
+#print ("Top level assemblies: ", set(assembly))     
 
-    
- 
-
+#(SELECT %r UNION ALL)" % (keys_to_sql, tuple(vars_to_sql)) 
+#print vars_to_sql
     
