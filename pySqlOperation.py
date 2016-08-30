@@ -11,7 +11,7 @@ connectString = (
     "SERVER=CABANONS00006v;"
     "PORT=3306;"
     "DATABASE=Cf_Ext;"
-    "USER=xxxx;"
+    "USER=user;"
     "PASSWORD=xxxx;"
     "OPTION=3;"
 )
@@ -32,30 +32,8 @@ def executeSQLQuery(query):
     print "SQL query executed"
     connection.Close()
     
-    
-    
-    
 
 
-
-# query = "SELECT * FROM SE_BOM"
-# 
-# 
-# connection = OdbcConnection(connectString)
-# adaptor = OdbcDataAdapter(query, connection)
-# dataSet = DataSet()
-# connection.Open()
-# adaptor.Fill(dataSet)
-# connection.Close()
-# columnNames = [column.ColumnName for column in dataSet.Tables[0].Columns]
-# print columnNames
-# 
-# rows = []
-# for row in dataSet.Tables[0].Rows:
-#     rows.append(list(row))
-#     
-# for items in rows:
-#     print items
 
 
 
