@@ -12,20 +12,21 @@ connectString = (
     "PORT=3306;"
     "DATABASE=Cf_Ext;"
     "USER=user;"
-    "PASSWORD=xxxx;"
+    "PASSWORD=xxx;"
     "OPTION=3;"
 )
 
 connection = OdbcConnection(connectString)
 
-def ZapSE_BOM():
+
+def zapse_bom():
     connection.Open()
     command = OdbcCommand("delete SE_BOM;", connection)
     command.ExecuteNonQuery()
     print "SE_BOM Zapped"
     connection.Close()
     
-def executeSQLQuery(query):
+def executesqlquery(query):
     connection.Open()
     command = OdbcCommand(query, connection)
     command.ExecuteNonQuery()

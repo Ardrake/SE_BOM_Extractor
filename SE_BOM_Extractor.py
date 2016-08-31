@@ -13,13 +13,13 @@ objDocument = objApplication.ActiveDocument
 objOccurenceSets = objDocument.Occurrences
 
 
-def extractsuboccurrence(objOccurenceSets, level=1, nomenclature=[]):
+def extractsuboccurrence(objoccurencesets, level=1, nomenclature=[]):
     #Extract part object, in index 0, 2nd level of assembly Index 1, part name,
     # Index 2,3 and 4 are Length, Witdh and heigth
     #part = ["groupname", "order", "assembly", "part", "longueur", "largeur", "Epaisseur","Materiel"]
 
-    for i in range(objOccurenceSets.Count):
-        objsuboccurrences = objOccurenceSets.Item(i + 1)
+    for i in range(objoccurencesets.Count):
+        objsuboccurrences = objoccurencesets.Item(i + 1)
         if not objsuboccurrences.Subassembly:
             try:
                 variableset = objsuboccurrences.SubOccurrenceDocument.Variables
@@ -29,25 +29,25 @@ def extractsuboccurrence(objOccurenceSets, level=1, nomenclature=[]):
                 modelsset = objsuboccurrences.SubOccurrenceDocument.Models
             except:
                 modelsset = None
-            if CheckBody(modelsset):
-                SE_long = 0
-                SE_larg = 0
-                SE_epai = 0
+            if checkbody(modelsset):
+                se_long = 0
+                se_larg = 0
+                se_epai = 0
                 for i in range(variableset.Count):
                     variables = variableset.Item(i + 1)
                     if variables.ExposeName == "SE_LONGUEUR":
-                        SE_long = convert(variables.Value)
+                        se_long = convert(variables.Value)
                     if variables.ExposeName == "SE_LARGEUR":
-                        SE_larg = convert(variables.Value)
+                        se_larg = convert(variables.Value)
                     if variables.ExposeName == "SE_EPAISSEUR":
-                        SE_epai = convert(variables.Value)
-                SE_Material = objsuboccurrences.SubOccurrenceDocument.Properties.Item(7).Item(1).Value
-                SE_DocName = objsuboccurrences.SubOccurrenceDocument.Properties.Item(5).Item(1).Value
-                SE_TopName = findnamebylevel(objsuboccurrences,level-1)
-                if SE_DocName == '':
-                    SE_DocName = objsuboccurrences.Name
-                part = [assigngroupname(SE_TopName)[0], assigngroupname(SE_TopName)[1], SE_TopName,
-                        objOccurenceSets.Parent.Name, SE_DocName, (SE_epai, SE_larg, SE_long), SE_Material]
+                        se_epai = convert(variables.Value)
+                se_material = objsuboccurrences.SubOccurrenceDocument.Properties.Item(7).Item(1).Value
+                se_docname = objsuboccurrences.SubOccurrenceDocument.Properties.Item(5).Item(1).Value
+                se_topname = findnamebylevel(objsuboccurrences, level-1)
+                if se_docname == '':
+                    se_docname = objsuboccurrences.Name
+                part = [assigngroupname(se_topname)[0], assigngroupname(se_topname)[1], se_topname,
+                        objoccurencesets.Parent.Name, se_docname, (se_epai, se_larg, se_long), se_material]
                 nomenclature.append(part)
         if objsuboccurrences.SubOccurrences is not None:
             extractsuboccurrence(objsuboccurrences.SubOccurrences, level+1)
@@ -73,7 +73,7 @@ def BuildQuery(BOM):
             if value_type == tuple:
                 for n in i:
                     vars_to_sql.append("'"+str(n)+"'")
-            if value_type <> tuple:
+            if value_type != tuple:
                 vars_to_sql.append("'"+i+"'")
         final_to_sql = ','.join(vars_to_sql)
         if tot_rec == len(BOM):
@@ -83,10 +83,11 @@ def BuildQuery(BOM):
     return sqlquery
 
 
-def CheckBody(ModelSet):
+def checkbody(modelset):
     #Function to determine if Object has a body
+    bodyvalid = False
     try:
-        for Model in ModelSet:
+        for Model in modelset:
             if Model.Body is not None:
                 bodyvalid = True
     except:
@@ -122,10 +123,7 @@ def assigngroupname(mur):
 MP = extractsuboccurrence(objOccurenceSets)
 
 #BuildQuery(MP)
-pySqlOperation.ZapSE_BOM()
-pySqlOperation.executeSQLQuery(BuildQuery(MP))
-
-
-
+pySqlOperation.zapse_bom()
+pySqlOperation.executesqlquery(BuildQuery(MP))
 
 
