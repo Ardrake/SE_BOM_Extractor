@@ -12,7 +12,7 @@ _________________________________________________________________
 
 The program requires Interop.SolidEdge.dll to be copied in its
 folder. The DLL is part of Jason Newell's project and can be
-downloaded from http://solidedgeinterop.codeplex.com/
+downloaded from https://github.com/SolidEdgeCommunity/Interop.SolidEdge
 Tested with IronPython 2.7.4 on .NET 4.0 and Solid Edge ST6.
 _________________________________________________________________
 
